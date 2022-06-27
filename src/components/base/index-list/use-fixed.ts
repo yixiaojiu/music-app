@@ -1,24 +1,33 @@
 import type { ArtistItem } from '@/utils/types/artist-list'
-import { ref, watch, nextTick } from 'vue'
+import type { Ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 
-export function useFixed(props: Readonly<{ artistList: ArtistItem[]; pos: number }>) {
-  const groupRef = ref<HTMLUListElement | null>(null)
+export function useFixed(props: Readonly<{ artistList: ArtistItem[] }>, pos: Ref<number>, groupRef: Ref<HTMLUListElement | null>) {
   const listHeights = ref<number[]>([])
+  const fixedTitle = ref('热')
+  const distance = ref()
+  let calculateControl = true
+  const TITLE_HEIGHT = 30
 
-  watch(
-    () => props.artistList,
-    async () => {
-      await nextTick()
+  const fixedStyle = computed(() => {
+    const diff = distance.value > 0 && distance.value < TITLE_HEIGHT ? distance.value - TITLE_HEIGHT : 0
+    return `transform: translateY(${diff}px);`
+  })
+
+  watch(pos, (newVal) => {
+    if (calculateControl) {
       calculate()
+      calculateControl = false
     }
-  )
-
-  watch(
-    () => props.pos,
-    () => {
-      console.log(props.pos)
+    for (let i = 0; i < listHeights.value.length - 1; i++) {
+      const heightTop = listHeights.value[i]
+      const heightBottom = listHeights.value[i + 1]
+      if (newVal >= heightTop && newVal <= heightBottom) {
+        fixedTitle.value = props.artistList[i].title
+        distance.value = heightBottom - newVal
+      }
     }
-  )
+  })
 
   function calculate() {
     const list = groupRef.value?.children
@@ -36,6 +45,7 @@ export function useFixed(props: Readonly<{ artistList: ArtistItem[]; pos: number
   }
 
   return {
-    groupRef
+    fixedTitle,
+    fixedStyle
   }
 }

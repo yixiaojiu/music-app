@@ -8,8 +8,6 @@ import indexList from '@/components/base/index-list/index.vue'
 
 const state = useStateStore()
 const artistList = ref<ArtistItem[]>([])
-const scrollRef = ref<HTMLDivElement | null>(null)
-const scrollPos = ref(0)
 
 // 获取并处理歌手数据逻辑
 state.loading = true
@@ -59,17 +57,10 @@ if (state.artistList.length) {
 }
 // 关闭全局loading
 state.loading = false
-
-const handleScroll = () => {
-  if (!scrollRef.value) {
-    return
-  }
-  scrollPos.value = scrollRef.value.scrollTop
-}
 </script>
 
 <template>
-  <div class="scroll-box relative" @scroll="handleScroll" ref="scrollRef">
-    <indexList :artistList="artistList" :pos="scrollPos" />
+  <div relative singer-container overflow-hidden>
+    <indexList :artistList="artistList" />
   </div>
 </template>

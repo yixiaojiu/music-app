@@ -7,12 +7,12 @@ import FullLoading from '@/components/base/full-loading/index.vue'
 import { onBeforeMount } from 'vue'
 import { getRealIP } from '@/request/get-ip/index'
 import { useStateStore } from '@/stores/state'
-const state = useStateStore()
+const stores = useStateStore()
 
 onBeforeMount(async () => {
   // 获取ip,并存到store中
   const { data: res } = await getRealIP()
-  state.realIP = res.ip
+  stores.realIP = res.ip
 })
 </script>
 

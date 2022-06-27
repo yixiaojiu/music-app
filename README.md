@@ -80,3 +80,22 @@ app.directive('img-lazy', {
 ```bash
 git pull --rebase origin main
 ```
+
+## ts 类型报错
+
+![类型报错](doc/img/ts-type-error.png)
+
+**解决方法**
+
+```TypeScript
+const props = withDefaults(
+  defineProps<{
+    artistList: ArtistItem[]
+    pos: number
+  }>(),
+  {
+    artistList: () => [],
+    pos: 0
+  }
+)
+```

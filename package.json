@@ -19,6 +19,7 @@
   "devDependencies": {
     "@iconify-json/fa6-solid": "^1.1.4",
     "@types/node": "^16.11.41",
+    "@unocss/preset-attributify": "^0.41.1",
     "@vitejs/plugin-vue": "^2.3.3",
     "@vue/tsconfig": "^0.1.3",
     "less": "^4.1.3",
