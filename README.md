@@ -66,3 +66,17 @@ app.directive('img-lazy', {
 ## 工具包
 
 - [汉字转拼音](https://www.npmjs.com/package/pinyin-pro)
+
+## git 首次提交报错
+
+参考[csdn](https://blog.csdn.net/qq_45893999/article/details/106273214)
+
+> 原因：创建文件时添加了文件，进行了一次提交，导致两端都有文件，但这两份内容没有关系
+
+![git-error](doc/img/git-push-error.png)
+
+**解决方法**
+
+```bash
+git pull --rebase origin main
+```
