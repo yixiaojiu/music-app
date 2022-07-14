@@ -5,9 +5,11 @@ import { pinyin } from 'pinyin-pro'
 import { ref } from 'vue'
 import { useStateStore } from '@/stores/state'
 import indexList from '@/components/base/index-list/index.vue'
+import { RouterView, useRouter } from 'vue-router'
 
 const state = useStateStore()
 const artistList = ref<ArtistItem[]>([])
+const router = useRouter()
 
 // 获取并处理歌手数据逻辑
 state.loading = true
@@ -57,10 +59,15 @@ if (state.artistList.length) {
 }
 // 关闭全局loading
 state.loading = false
+
+const selectSinger = (id: number) => {
+  router.push(`/singer/${17014}`)
+}
 </script>
 
 <template>
   <div relative singer-container overflow-hidden>
-    <indexList :artistList="artistList" />
+    <indexList :artistList="artistList" @selected="selectSinger" />
   </div>
+  <RouterView></RouterView>
 </template>

@@ -1,12 +1,11 @@
 import type { ArtistItem } from '@/utils/types/artist-list'
 import type { Ref } from 'vue'
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 
 export function useFixed(props: Readonly<{ artistList: ArtistItem[] }>, pos: Ref<number>, groupRef: Ref<HTMLUListElement | null>) {
   const listHeights = ref<number[]>([])
   const fixedTitle = ref('热')
   const distance = ref()
-  let calculateControl = true
   const TITLE_HEIGHT = 30
 
   const fixedStyle = computed(() => {
@@ -14,11 +13,11 @@ export function useFixed(props: Readonly<{ artistList: ArtistItem[] }>, pos: Ref
     return `transform: translateY(${diff}px);`
   })
 
+  onMounted(() => {
+    calculate()
+  })
+
   watch(pos, (newVal) => {
-    if (calculateControl) {
-      calculate()
-      calculateControl = false
-    }
     for (let i = 0; i < listHeights.value.length - 1; i++) {
       const heightTop = listHeights.value[i]
       const heightBottom = listHeights.value[i + 1]
@@ -46,6 +45,7 @@ export function useFixed(props: Readonly<{ artistList: ArtistItem[] }>, pos: Ref
 
   return {
     fixedTitle,
-    fixedStyle
+    fixedStyle,
+    listHeights
   }
 }

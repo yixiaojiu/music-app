@@ -12,7 +12,15 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/singer',
     name: 'singer',
-    component: () => import('@/views/Singer.vue')
+    component: () => import('@/views/Singer.vue'),
+    children: [
+      {
+        path: ':id',
+        name: 'singerDetail',
+        component: () => import('@/views/SingerDetail.vue'),
+        props: true
+      }
+    ]
   },
   {
     path: '/top-list',

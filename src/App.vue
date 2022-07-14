@@ -40,4 +40,9 @@ a {
 ul {
   list-style: none;
 }
+button {
+  outline: none;
+  background-color: transparent;
+  border: none;
+}
 </style>
