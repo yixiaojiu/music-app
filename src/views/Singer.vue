@@ -69,5 +69,9 @@ const selectSinger = (id: number) => {
   <div relative singer-container overflow-hidden>
     <indexList :artistList="artistList" @selected="selectSinger" />
   </div>
-  <RouterView></RouterView>
+  <router-view v-slot="{ Component }">
+    <transition enter-active-class="animate__animated animate__fadeInRight" leave-active-class="animate__animated animate__fadeOutRight">
+      <component :is="Component" />
+    </transition>
+  </router-view>
 </template>
