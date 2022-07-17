@@ -8,6 +8,6 @@ export const getIP = axios.create({
 })
 
 export const music = axios.create({
-  baseURL: 'https://netease-cloud-music-m0iruslvv-yixiaojiu.vercel.app/',
+  baseURL: 'https://netease-cloud-music-api-psi-gray.vercel.app/',
   withCredentials: true
 })

@@ -12,13 +12,16 @@
     "@vueuse/core": "^8.7.5",
     "animate.css": "^4.1.1",
     "axios": "^0.27.2",
-    "pinia": "^2.0.14",
+    "lodash": "^4.17.21",
+    "pinia": "^2.0.16",
     "pinyin-pro": "^3.10.1",
     "vue": "^3.2.37",
     "vue-router": "^4.0.16"
   },
   "devDependencies": {
+    "@iconify-json/bi": "^1.1.5",
     "@iconify-json/fa6-solid": "^1.1.4",
+    "@types/lodash": "^4.14.182",
     "@types/node": "^16.11.41",
     "@unocss/preset-attributify": "^0.41.1",
     "@vitejs/plugin-vue": "^2.3.3",

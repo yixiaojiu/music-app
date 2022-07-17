@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router'
 import Header from '@/components/header/index.vue'
 import Tab from '@/components/tab/index.vue'
 import FullLoading from '@/components/base/full-loading/index.vue'
+import MusicPlayer from '@/components/music-player/index.vue'
 
 import { onBeforeMount } from 'vue'
 import { getRealIP } from '@/request/get-ip/index'
@@ -23,6 +24,7 @@ onBeforeMount(async () => {
       <Header />
       <Tab />
       <RouterView />
+      <MusicPlayer />
     </div>
   </Suspense>
 </template>

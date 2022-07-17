@@ -5,8 +5,6 @@ import type { ArtistInfoReq, ArtistInfoRes } from './types/artist-info'
 import type { SongUrlReq, SongUrlRes } from './types/song-url'
 
 import { useStateStore } from '@/stores/state'
-const state = useStateStore()
-
 import { music } from '../request'
 
 export function getBanner(data: BannerReq) {
@@ -22,10 +20,12 @@ export function getArtist(data: ArtistReq) {
 }
 
 export function getArtistInfo(data: ArtistInfoReq) {
+  const state = useStateStore()
   // 17014 1049179 1047282
   return music.post<ArtistInfoRes>('/artists', { ...data, realIP: state.realIP })
 }
 
 export function getSongUrls(data: SongUrlReq) {
-  return music.post<SongUrlRes>('/song/url', { id: data.id.join(','), realIP: state.realIP })
+  const state = useStateStore()
+  return music.post<SongUrlRes>(`/song/url`, { id: data.id.join(','), realIP: state.realIP })
 }
