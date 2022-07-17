@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MusicItme } from '@/utils/types/music-store'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useMusicStore } from '@/stores/music'
 import { useLocalStorage } from '@vueuse/core'
 import _ from 'lodash'
@@ -14,11 +14,14 @@ import PauseIcon from '@/assets/icons/pause-icon.vue'
 import NextPlayIcon from '@/assets/icons/next-play-icon.vue'
 import LoveIcon from '@/assets/icons/love-icon.vue'
 import LoveActiveIcon from '@/assets/icons/love-active-icon.vue'
+import ProgressBar from '@/components/progress-bar/index.vue'
 
 const useMusic = useMusicStore()
 const audioRef = ref<HTMLAudioElement | null>(null)
 const songReady = ref(false)
 const favoriteList = useLocalStorage('favoriteList', <MusicItme[]>[])
+const currentTime = ref(0)
+const duration = ref(0)
 
 watch(
   () => useMusic.currentSong,
@@ -45,9 +48,11 @@ watch(
 )
 
 const playPrev = () => {
+  currentTime.value = 0
   useMusic.prev() && loop()
 }
 const playNext = () => {
+  currentTime.value = 0
   useMusic.next() && loop()
 }
 // 当只有一首歌时，循环逻辑
@@ -63,6 +68,10 @@ const readyed = () => {
   if (songReady.value) {
     return
   }
+  if (!audioRef.value) {
+    return
+  }
+  duration.value = audioRef.value.duration
   songReady.value = true
   useMusic.playing = true
 }
@@ -96,6 +105,27 @@ const toggleFavorite = () => {
     favoriteList.value.push(useMusic.currentSong)
   }
 }
+
+let isProgressActive = false
+const updateTime = (e: Event) => {
+  if (isProgressActive) {
+    return
+  }
+  currentTime.value = (e.target as HTMLAudioElement).currentTime
+}
+// 进度条事件
+const handleTimeChange = (newTime: number) => {
+  isProgressActive = true
+  currentTime.value = newTime
+}
+const handleMoveEnd = () => {
+  if (!audioRef.value) {
+    return
+  }
+  audioRef.value.currentTime = currentTime.value
+  isProgressActive = false
+  useMusic.playing = true
+}
 </script>
 
 <template>
@@ -112,7 +142,8 @@ const toggleFavorite = () => {
       </div>
       <p text-white text-center h-8 leading-8>{{ useMusic.currentSong.artistList }}</p>
     </div>
-    <div flex justify-around items-center>
+    <ProgressBar :current-time="currentTime" :total-time="duration" @time-change="handleTimeChange" @move-end="handleMoveEnd" />
+    <div flex justify-around items-center my-4>
       <button text-yellow-400 @click="changeMode">
         <RepeatIcon v-if="useMusic.playMode === 'sequence'" />
         <RepeatOneIcon v-else-if="useMusic.playMode === 'loop'" />
@@ -135,6 +166,6 @@ const toggleFavorite = () => {
         <LoveIcon v-else />
       </button>
     </div>
-    <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError"></audio>
+    <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError" @timeupdate="updateTime"></audio>
   </div>
 </template>
