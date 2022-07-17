@@ -87,11 +87,11 @@ onMounted(() => {
 
 <template>
   <div flex font-normal text-sm w="4/5" items-center mx-auto>
-    <span text-gray-300>{{ TimeToMinute(currentTime) }}</span>
-    <div relative bg-gray-900 flex-auto rounded-1 h-1 mx-3 ref="controlerRef" @click="handleControlerClick">
+    <span text-gray-300 mr-3>{{ TimeToMinute(currentTime) }}</span>
+    <div relative bg-gray-900 flex-auto rounded-1 h-1 ref="controlerRef" @click="handleControlerClick">
       <div bg-yellow-400 h-full rounded-1 :style="{ width: currentWidth + 'px' }"></div>
       <div absolute w-3 h-3 rounded-full bg-yellow-400 class="-translate-x-1/2 -translate-y-1/2 top-1/2" :style="{ left: currentWidth + 'px' }" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd"></div>
     </div>
-    <span text-gray-200>{{ TimeToMinute(totalTime) }}</span>
+    <span text-gray-200 ml-3>{{ TimeToMinute(totalTime) }}</span>
   </div>
 </template>

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { MusicItme } from '@/utils/types/music-store'
-import { ref, watch, onMounted } from 'vue'
+import type { lyric } from '@/utils/types/lyric'
+import { ref, watch } from 'vue'
 import { useMusicStore } from '@/stores/music'
 import { useLocalStorage } from '@vueuse/core'
+import { getLyric } from '@/request/music/index'
 import _ from 'lodash'
+import LyricParser from 'lyric-parser'
 
 import RepeatIcon from '@/assets/icons/repeat-icon.vue'
 import RepeatOneIcon from '@/assets/icons/repeat-one-icon.vue'
@@ -18,10 +21,14 @@ import ProgressBar from '@/components/progress-bar/index.vue'
 
 const useMusic = useMusicStore()
 const audioRef = ref<HTMLAudioElement | null>(null)
+const cdContainerRef = ref<HTMLDivElement | null>(null)
+const cdImgRef = ref<HTMLImageElement | null>(null)
 const songReady = ref(false)
 const favoriteList = useLocalStorage('favoriteList', <MusicItme[]>[])
 const currentTime = ref(0)
 const duration = ref(0)
+const currentLyric = ref<lyric>({} as lyric)
+const currentLineNum = ref(0)
 
 watch(
   () => useMusic.currentSong,
@@ -32,6 +39,17 @@ watch(
     useMusic.playing = false
     songReady.value = false
     audioRef.value.src = `https://music.163.com/song/media/outer/url?id=${newSong.id}`
+    let lyric = ''
+    if (newSong.lyric) {
+      lyric = newSong.lyric
+    } else {
+      const { data: res } = await getLyric({ id: newSong.id })
+      newSong.lyric = res.lrc.lyric
+      lyric = res.lrc.lyric
+    }
+    currentLyric.value = new LyricParser(lyric, (params) => {
+      currentLineNum.value = params.lineNum
+    })
   }
 )
 watch(
@@ -43,7 +61,12 @@ watch(
     if (!songReady.value) {
       return
     }
-    newPlaying ? audioRef.value.play() : audioRef.value.pause()
+    if (newPlaying) {
+      audioRef.value.play()
+    } else {
+      audioRef.value.pause()
+    }
+    asyncTransform()
   }
 )
 
@@ -60,7 +83,9 @@ const loop = () => {
   if (!audioRef.value) {
     return
   }
+  currentTime.value = 0
   audioRef.value.currentTime = 0
+  useMusic.playing = true
 }
 
 // 当歌曲可播放逻辑
@@ -113,6 +138,14 @@ const updateTime = (e: Event) => {
   }
   currentTime.value = (e.target as HTMLAudioElement).currentTime
 }
+const musicEnd = () => {
+  if (useMusic.playMode === 'loop') {
+    loop()
+  } else {
+    playNext()
+  }
+}
+
 // 进度条事件
 const handleTimeChange = (newTime: number) => {
   isProgressActive = true
@@ -126,6 +159,23 @@ const handleMoveEnd = () => {
   isProgressActive = false
   useMusic.playing = true
 }
+
+function asyncTransform() {
+  if (!cdContainerRef.value) {
+    return
+  }
+  if (!cdImgRef.value) {
+    return
+  }
+  if (useMusic.playing) {
+    cdImgRef.value.classList.add('animate-spin')
+  } else {
+    const imgTransform = getComputedStyle(cdImgRef.value).transform
+    const containerTransform = getComputedStyle(cdContainerRef.value).transform
+    cdContainerRef.value.style.transform = containerTransform === 'none' ? imgTransform : imgTransform.concat(' ', containerTransform)
+    cdImgRef.value.classList.remove('animate-spin')
+  }
+}
 </script>
 
 <template>
@@ -133,6 +183,7 @@ const handleMoveEnd = () => {
     <div absolute top-0 left-0 w-full h-full opacity-60 z--1 blur-20>
       <img h-full :src="useMusic.currentSong.picUrl" alt="songPic" />
     </div>
+
     <div mb-4>
       <div relative>
         <button @click="useMusic.fullScreen = false" absolute left-4 top="1/2" class="-translate-y-1/2">
@@ -142,8 +193,16 @@ const handleMoveEnd = () => {
       </div>
       <p text-white text-center h-8 leading-8>{{ useMusic.currentSong.artistList }}</p>
     </div>
-    <ProgressBar :current-time="currentTime" :total-time="duration" @time-change="handleTimeChange" @move-end="handleMoveEnd" />
-    <div flex justify-around items-center my-4>
+
+    <div h-screen-60 custom-container>
+      <div ref="cdContainerRef" w-screen-80 h-w-screen-80 mx-auto rounded-full overflow-hidden border-8 border-gray-300 border-opacity-30>
+        <img ref="cdImgRef" max-w-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />
+      </div>
+    </div>
+
+    <ProgressBar my-10 :current-time="currentTime" :total-time="duration" @time-change="handleTimeChange" @move-end="handleMoveEnd" />
+
+    <div flex justify-between items-center my-4 custom-container>
       <button text-yellow-400 @click="changeMode">
         <RepeatIcon v-if="useMusic.playMode === 'sequence'" />
         <RepeatOneIcon v-else-if="useMusic.playMode === 'loop'" />
@@ -166,6 +225,7 @@ const handleMoveEnd = () => {
         <LoveIcon v-else />
       </button>
     </div>
-    <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError" @timeupdate="updateTime"></audio>
+
+    <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError" @timeupdate="updateTime" @ended="musicEnd"></audio>
   </div>
 </template>

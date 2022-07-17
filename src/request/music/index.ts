@@ -3,6 +3,7 @@ import type { PlaylistReq, PlaylistRes } from './types/playlist'
 import type { ArtistReq, ArtistRes } from './types/artist'
 import type { ArtistInfoReq, ArtistInfoRes } from './types/artist-info'
 import type { SongUrlReq, SongUrlRes } from './types/song-url'
+import type { LyricReq, LyricRes } from './types/lyric'
 
 import { useStateStore } from '@/stores/state'
 import { music } from '../request'
@@ -28,4 +29,9 @@ export function getArtistInfo(data: ArtistInfoReq) {
 export function getSongUrls(data: SongUrlReq) {
   const state = useStateStore()
   return music.post<SongUrlRes>(`/song/url`, { id: data.id.join(','), realIP: state.realIP })
+}
+
+export function getLyric(data: LyricReq) {
+  const state = useStateStore()
+  return music.post<LyricRes>(`/lyric`, { id: data.id, realIP: state.realIP })
 }
