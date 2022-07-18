@@ -7,6 +7,7 @@ import { useLocalStorage } from '@vueuse/core'
 import { getLyric } from '@/request/music/index'
 import _ from 'lodash'
 import LyricParser from 'lyric-parser'
+import { useMiddleInteractive } from './use-middle-interactive'
 
 import RepeatIcon from '@/assets/icons/repeat-icon.vue'
 import RepeatOneIcon from '@/assets/icons/repeat-one-icon.vue'
@@ -19,7 +20,6 @@ import LoveIcon from '@/assets/icons/love-icon.vue'
 import LoveActiveIcon from '@/assets/icons/love-active-icon.vue'
 import ProgressBar from '@/components/progress-bar/index.vue'
 
-const useMusic = useMusicStore()
 const audioRef = ref<HTMLAudioElement | null>(null)
 const cdContainerRef = ref<HTMLDivElement | null>(null)
 const cdImgRef = ref<HTMLImageElement | null>(null)
@@ -28,8 +28,14 @@ const songReady = ref(false)
 const favoriteList = useLocalStorage('favoriteList', <MusicItme[]>[])
 const currentTime = ref(0)
 const duration = ref(0)
+
 const currentLyric = ref<lyric>({} as lyric)
 const currentLineNum = ref(0)
+const pureMusicLyric = ref('')
+const playingLyric = ref('')
+
+const useMusic = useMusicStore()
+const { handleMiddleTouchStart, handleMiddleTouchMove, handleMiddleTouchEnd, translateX, opacity, firstActive } = useMiddleInteractive()
 
 watch(
   () => useMusic.currentSong,
@@ -40,6 +46,12 @@ watch(
     useMusic.playing = false
     songReady.value = false
     audioRef.value.src = `https://music.163.com/song/media/outer/url?id=${newSong.id}`
+    // 歌词逻辑
+    stopLyric()
+    currentLyric.value = {} as lyric
+    currentLineNum.value = 0
+    pureMusicLyric.value = ''
+    playingLyric.value = ''
     let lyric = ''
     if (newSong.lyric) {
       lyric = newSong.lyric
@@ -48,11 +60,12 @@ watch(
       newSong.lyric = res.lrc.lyric
       lyric = res.lrc.lyric
     }
-    currentLyric.value = new LyricParser(lyric, ({ lineNum }) => {
+    currentLyric.value = new LyricParser(lyric, ({ lineNum, txt }) => {
       if (!lyricBox.value) {
         return
       }
       currentLineNum.value = lineNum
+      playingLyric.value = txt
       if (lineNum > 5) {
         const lineEl = lyricBox.value.children[lineNum - 5] as HTMLParagraphElement
         lyricBox.value.scrollTo({
@@ -61,8 +74,13 @@ watch(
         })
       }
     })
-    if (songReady.value) {
-      playLyric()
+
+    if (lyric.length > 100) {
+      if (songReady.value) {
+        playLyric()
+      }
+    } else {
+      playingLyric.value = pureMusicLyric.value = '纯音乐，请欣赏'
     }
   }
 )
@@ -77,8 +95,10 @@ watch(
     }
     if (newPlaying) {
       audioRef.value.play()
+      playLyric()
     } else {
       audioRef.value.pause()
+      stopLyric()
     }
     asyncTransform()
   }
@@ -88,6 +108,12 @@ watch(
 function playLyric() {
   if (currentLyric.value.lrc) {
     currentLyric.value.seek(currentTime.value * 1000)
+  }
+}
+
+function stopLyric() {
+  if (currentLyric.value.lrc) {
+    currentLyric.value.stop()
   }
 }
 
@@ -172,6 +198,10 @@ const musicEnd = () => {
 const handleTimeChange = (newTime: number) => {
   isProgressActive = true
   currentTime.value = newTime
+  // 将歌词同步到拖动位置
+  playLyric()
+  // 当仍在拖动时，不让歌词播放
+  stopLyric()
 }
 const handleMoveEnd = () => {
   if (!audioRef.value) {
@@ -180,6 +210,8 @@ const handleMoveEnd = () => {
   audioRef.value.currentTime = currentTime.value
   isProgressActive = false
   useMusic.playing = true
+  // 拖动完成，同步歌词
+  playLyric()
 }
 
 function asyncTransform() {
@@ -202,7 +234,7 @@ function asyncTransform() {
 
 <template>
   <div v-show="useMusic.fullScreen" fixed top-0 left-0 w-screen h-screen z-10 overflow-hidden bg-gray-800>
-    <div absolute top-0 left-0 w-full h-full opacity-60 z--1 blur-20>
+    <div absolute top-0 left-0 w-full h-full opacity-40 z--1 blur-20>
       <img h-full :src="useMusic.currentSong.picUrl" alt="songPic" />
     </div>
 
@@ -216,15 +248,22 @@ function asyncTransform() {
       <p text-white text-center h-8 leading-8>{{ useMusic.currentSong.artistList }}</p>
     </div>
 
-    <div h-screen-60 custom-container relative overflow-hidden>
-      <div opacity-0>
-        <div ref="cdContainerRef" w-screen-80 h-w-screen-80 mx-auto rounded-full overflow-hidden border-8 border-gray-300 border-opacity-30>
-          <img ref="cdImgRef" max-w-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />
+    <div h-screen-60 w-screen @touchstart="handleMiddleTouchStart" @touchmove="handleMiddleTouchMove" @touchend="handleMiddleTouchEnd">
+      <div h-full custom-container relative>
+        <div w-full h-full :style="{ opacity: opacity }">
+          <div ref="cdContainerRef" w-screen-80 h-w-screen-80 mx-auto rounded-full overflow-hidden border-8 border-gray-300 border-opacity-30>
+            <img ref="cdImgRef" max-w-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />
+          </div>
+          <p text-center text-gray-400 mt-4>{{ playingLyric }}</p>
         </div>
-        <p></p>
-      </div>
-      <div ref="lyricBox" absolute top-0 left-0 w-full h-full scroll-box>
-        <p v-for="(item, index) in currentLyric.lines" text-gray-400 py-1 text-center :class="{ 'text-white': currentLineNum === index }">{{ item.txt }}</p>
+        <div ref="lyric" absolute top-0 left-0 w-full h-full overflow-hidden :style="{ transform: `translateX(${translateX}px)` }">
+          <div v-if="pureMusicLyric" w-full h-full flex items-center justify-center>
+            <p text-gray-400>{{ pureMusicLyric }}</p>
+          </div>
+          <div v-else ref="lyricBox" w-full h-full scroll-box>
+            <p v-for="(item, index) in currentLyric.lines" text-gray-400 py-1 text-center :class="{ 'text-white': currentLineNum === index }">{{ item.txt }}</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -257,9 +296,3 @@ function asyncTransform() {
     <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError" @timeupdate="updateTime" @ended="musicEnd"></audio>
   </div>
 </template>
-
-<style>
-div {
-  box-sizing: content-box;
-}
-</style>
