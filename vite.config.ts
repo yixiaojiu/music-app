@@ -13,7 +13,7 @@ export default defineConfig({
       presets: [presetWind(), presetIcons(), presetAttributify()],
       rules: [
         ['text-ell', { 'text-overflow': 'ellipsis', 'white-space': 'nowrap', overflow: 'hidden' }],
-        ['scroll-box', { overflow: 'scroll', 'margin-right': '-20px', 'padding-right': '20px' }],
+        ['scroll-box', { overflow: 'scroll', 'margin-right': '-20px', 'padding-right': '20px', 'box-sizing': 'content-box' }],
         ['singer-container', { height: 'calc(100vh - 56px - 40px)' }],
         [/^h-w-screen-(\d+)$/, (match) => ({ height: `${match[1]}vw` })],
         [/^w-screen-(\d+)$/, (match) => ({ width: `${match[1]}vw` })],

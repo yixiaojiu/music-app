@@ -23,6 +23,7 @@ const useMusic = useMusicStore()
 const audioRef = ref<HTMLAudioElement | null>(null)
 const cdContainerRef = ref<HTMLDivElement | null>(null)
 const cdImgRef = ref<HTMLImageElement | null>(null)
+const lyricBox = ref<HTMLDivElement | null>(null)
 const songReady = ref(false)
 const favoriteList = useLocalStorage('favoriteList', <MusicItme[]>[])
 const currentTime = ref(0)
@@ -47,9 +48,22 @@ watch(
       newSong.lyric = res.lrc.lyric
       lyric = res.lrc.lyric
     }
-    currentLyric.value = new LyricParser(lyric, (params) => {
-      currentLineNum.value = params.lineNum
+    currentLyric.value = new LyricParser(lyric, ({ lineNum }) => {
+      if (!lyricBox.value) {
+        return
+      }
+      currentLineNum.value = lineNum
+      if (lineNum > 5) {
+        const lineEl = lyricBox.value.children[lineNum - 5] as HTMLParagraphElement
+        lyricBox.value.scrollTo({
+          top: lineEl.offsetTop,
+          behavior: 'smooth'
+        })
+      }
     })
+    if (songReady.value) {
+      playLyric()
+    }
   }
 )
 watch(
@@ -69,6 +83,13 @@ watch(
     asyncTransform()
   }
 )
+
+// 歌词逻辑
+function playLyric() {
+  if (currentLyric.value.lrc) {
+    currentLyric.value.seek(currentTime.value * 1000)
+  }
+}
 
 const playPrev = () => {
   currentTime.value = 0
@@ -99,6 +120,7 @@ const readyed = () => {
   duration.value = audioRef.value.duration
   songReady.value = true
   useMusic.playing = true
+  playLyric()
 }
 
 const musicError = () => {
@@ -194,9 +216,15 @@ function asyncTransform() {
       <p text-white text-center h-8 leading-8>{{ useMusic.currentSong.artistList }}</p>
     </div>
 
-    <div h-screen-60 custom-container>
-      <div ref="cdContainerRef" w-screen-80 h-w-screen-80 mx-auto rounded-full overflow-hidden border-8 border-gray-300 border-opacity-30>
-        <img ref="cdImgRef" max-w-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />
+    <div h-screen-60 custom-container relative overflow-hidden>
+      <div opacity-0>
+        <div ref="cdContainerRef" w-screen-80 h-w-screen-80 mx-auto rounded-full overflow-hidden border-8 border-gray-300 border-opacity-30>
+          <img ref="cdImgRef" max-w-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />
+        </div>
+        <p></p>
+      </div>
+      <div ref="lyricBox" absolute top-0 left-0 w-full h-full scroll-box>
+        <p v-for="(item, index) in currentLyric.lines" text-gray-400 py-1 text-center :class="{ 'text-white': currentLineNum === index }">{{ item.txt }}</p>
       </div>
     </div>
 
@@ -229,3 +257,9 @@ function asyncTransform() {
     <audio ref="audioRef" autoplay @pause="useMusic.playing = false" @canplay="readyed" @error="musicError" @timeupdate="updateTime" @ended="musicEnd"></audio>
   </div>
 </template>
+
+<style>
+div {
+  box-sizing: content-box;
+}
+</style>
