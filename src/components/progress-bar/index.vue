@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { TimeToMinute } from '@/utils/methods'
-import { watch, onMounted, ref } from 'vue'
+import { watch, onMounted, ref, nextTick } from 'vue'
+import { useMusicStore } from '@/stores/music'
 
 type Props = {
   currentTime: number
   totalTime: number
 }
+
 const props = defineProps<Props>()
 const controlerRef = ref<HTMLDivElement | null>(null)
 const currentWidth = ref<number>(0)
+
+const useMusic = useMusicStore()
 
 const emits = defineEmits<{
   (e: 'time-change', newTime: number): void
@@ -24,8 +28,15 @@ const calcWidth = () => {
 
 watch(
   () => props.currentTime,
-  (newTime) => {
+  () => {
     calcWidth()
+  }
+)
+
+watch(
+  () => useMusic.fullScreen,
+  (newFullScreen) => {
+    newFullScreen && nextTick(() => calcWidth())
   }
 )
 

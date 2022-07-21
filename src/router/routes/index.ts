@@ -7,7 +7,15 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/recommend',
     name: 'recommend',
-    component: () => import('@/views/Recommend.vue')
+    component: () => import('@/views/Recommend.vue'),
+    children: [
+      {
+        path: ':id',
+        name: 'albumDetail',
+        component: () => import('@/views/AlbumDetail.vue'),
+        props: true
+      }
+    ]
   },
   {
     path: '/singer',

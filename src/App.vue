@@ -47,4 +47,8 @@ button {
   background-color: transparent;
   border: none;
 }
+input {
+  border: none;
+  outline: none;
+}
 </style>

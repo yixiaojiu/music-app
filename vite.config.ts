@@ -18,7 +18,21 @@ export default defineConfig({
         [/^h-w-screen-(\d+)$/, (match) => ({ height: `${match[1]}vw` })],
         [/^w-screen-(\d+)$/, (match) => ({ width: `${match[1]}vw` })],
         [/^h-screen-(\d+)$/, (match) => ({ height: `${match[1]}vh` })],
-        ['custom-container', { width: '80vw', margin: '0 auto' }]
+        ['custom-container', { width: '80vw', margin: '0 auto' }],
+        ['dot-active', { width: '1rem', background: 'rgb(209, 213, 219)' }],
+        ['custom-transition-transform', { transition: 'transform 0.15s linear' }],
+        ['bg-000000', { color: '#000' }]
+      ],
+      shortcuts: [
+        {
+          'btn-primary': 'w-8 h-8 flex items-center justify-center'
+        },
+        {
+          'flex-center': 'flex items-center justify-center'
+        },
+        {
+          'fixed-full': 'fixed top-0 left-0 w-screen h-screen'
+        }
       ]
     })
   ],

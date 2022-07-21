@@ -7,31 +7,45 @@ export function useMiddleInteractive() {
   const translateX = ref(WIDTH)
   const opacity = ref(1)
   const firstActive = ref(true)
+  const transitonDuration = ref(0)
 
-  let startPositonX = 0
+  let startPositionX = 0
+  let startPositionY = 0
   let movePositionX = 0
   let changedPositionX = 0
+  let changedPositionY = 0
   let differencePositonX = 0
   let percentage = 0
   let cacheTranslateX = 0
   let boundaryCase = false
+  let directionLocked: 'v' | 'h' | '' = ''
   const handleMiddleTouchStart = (e: TouchEvent) => {
-    startPositonX = e.touches[0].pageX
+    transitonDuration.value = 0
+    startPositionX = e.touches[0].pageX
+    startPositionY = e.touches[0].pageY
     cacheTranslateX = translateX.value
     differencePositonX = 0
     boundaryCase = false
+    directionLocked = ''
   }
   const handleMiddleTouchMove = (e: TouchEvent) => {
     if (boundaryCase) {
       return
     }
     movePositionX = e.touches[0].pageX
-    changedPositionX = movePositionX - startPositonX
+    changedPositionX = movePositionX - startPositionX
+    changedPositionY = e.touches[0].pageY - startPositionY
+    if (!directionLocked) {
+      directionLocked = Math.abs(changedPositionX) > Math.abs(changedPositionY) ? 'h' : 'v'
+    }
+    if (directionLocked === 'v') {
+      return
+    }
     if ((translateX.value === WIDTH && changedPositionX > 0) || (translateX.value === 0 && changedPositionX < 0)) {
       boundaryCase = true
       return
     }
-    startPositonX = movePositionX
+    startPositionX = movePositionX
     differencePositonX += changedPositionX
     translateX.value += changedPositionX
     percentage = translateX.value / WIDTH
@@ -41,8 +55,8 @@ export function useMiddleInteractive() {
     if (boundaryCase) {
       return
     }
+    transitonDuration.value = 0.3
     if (Math.abs(differencePositonX) / WIDTH < boundaryPercentage) {
-      console.log('aaa')
       if (cacheTranslateX === WIDTH) {
         translateX.value = WIDTH
         opacity.value = 1
@@ -51,7 +65,7 @@ export function useMiddleInteractive() {
         opacity.value = 0
       }
     } else {
-      console.log('bbb')
+      firstActive.value = !firstActive.value
       if (cacheTranslateX === WIDTH) {
         translateX.value = 0
         opacity.value = 0
@@ -68,6 +82,7 @@ export function useMiddleInteractive() {
     handleMiddleTouchEnd,
     translateX,
     opacity,
-    firstActive
+    firstActive,
+    transitonDuration
   }
 }

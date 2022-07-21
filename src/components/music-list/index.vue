@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useMusicStore } from '@/stores/music'
+
 type Props = {
   title: string
   picUrl: string
 }
 defineProps<Props>()
+
 const router = useRouter()
+const useMusic = useMusicStore()
 
 const blurNum = ref(0)
 const listRef = ref<HTMLUListElement | null>(null)
@@ -94,8 +98,9 @@ const handleBackClick = () => {
       <p ml-2>随机播放全部</p>
     </button>
   </div>
-  <ul @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" ref="listRef" class="list-container" scroll-box bg-gray-900>
+  <ul @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" ref="listRef" class="list-container" bottom-0 left-0 scroll-box bg-gray-900>
     <slot></slot>
+    <div h-15 v-if="!useMusic.fullScreen && useMusic.playList.length"></div>
   </ul>
 </template>
 
@@ -114,7 +119,6 @@ const handleBackClick = () => {
 }
 .list-container {
   width: 100%;
-  box-sizing: content-box;
   position: absolute;
   top: 300px;
   height: calc(100vh - 300px);

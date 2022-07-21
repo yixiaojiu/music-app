@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ArtistItem } from '@/utils/types/artist-list'
 import { useFixed } from './use-fixed'
+import { useMusicStore } from '@/stores/music'
 import { ref } from 'vue'
 
 const LI_HIGHT = 20
@@ -15,14 +16,15 @@ const emits = defineEmits<{
   (e: 'selected', id: number): void
 }>()
 
+const { fixedTitle, fixedStyle, listHeights } = useFixed(props, pos, groupRef)
+const useMusic = useMusicStore()
+
 const handleScroll = () => {
   if (!groupRef.value) {
     return
   }
   pos.value = groupRef.value.scrollTop
 }
-
-const { fixedTitle, fixedStyle, listHeights } = useFixed(props, pos, groupRef)
 
 // 侧边栏滑动逻辑
 let startPointY = 0
@@ -89,5 +91,6 @@ const handleClick = (id: number) => {
         </li>
       </ul>
     </li>
+    <div h-15 v-if="!useMusic.fullScreen && useMusic.playList.length"></div>
   </ul>
 </template>

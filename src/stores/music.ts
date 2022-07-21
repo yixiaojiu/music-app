@@ -16,9 +16,11 @@ export const useMusicStore = defineStore('music', () => {
   const currentIndex = ref(0)
   // 播放组件是否全屏
   const fullScreen = ref(false)
+  // 播放列表的显示与影藏
+  const playListVisalbe = ref(false)
 
   const currentSong = computed(() => {
-    return playList.value[currentIndex.value] || { songName: 'glow', id: 537854742, artistList: '鹿乃', picUrl: 'https://p1.music.126.net/iLcmytETSkZgd8xcGVEO5A==/109951163200361748.jpg' }
+    return playList.value[currentIndex.value] || {}
   })
 
   const selectPlay = (list: MusicItme[], index: number) => {
@@ -72,6 +74,24 @@ export const useMusicStore = defineStore('music', () => {
     playMode.value = mode
   }
 
+  const removeSong = (song: MusicItme) => {
+    if (_.findIndex(playList.value, (item) => item.id === song.id) < currentIndex.value || currentIndex.value === playList.value.length - 1) {
+      currentIndex.value--
+    }
+    _.remove(sequenceList.value, (item) => item.id === song.id)
+    _.remove(playList.value, (item) => item.id === song.id)
+    if (!playList.value.length) {
+      playing.value = false
+    }
+  }
+
+  const clearSongList = () => {
+    playing.value = false
+    currentIndex.value = 0
+    sequenceList.value = []
+    playList.value = []
+  }
+
   return {
     sequenceList,
     playList,
@@ -80,10 +100,13 @@ export const useMusicStore = defineStore('music', () => {
     currentIndex,
     fullScreen,
     currentSong,
+    playListVisalbe,
     selectPlay,
     randomPlay,
     prev,
     next,
-    changeMode
+    changeMode,
+    removeSong,
+    clearSongList
   }
 })
