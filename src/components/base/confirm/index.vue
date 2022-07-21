@@ -25,7 +25,7 @@ const handleCancelClick = () => {
 <template>
   <teleport to="body">
     <transition name="fade">
-      <div v-if="visible" fixed-full z-30 flex-center bg-black bg-opacity-30>
+      <div v-if="visible" fixed-full z-40 flex-center bg-black bg-opacity-30>
         <div class="box" rounded-4 bg-gray-800>
           <p py-3 px-10 text-center text-gray-400 text-lg border-b border-black>{{ text }}</p>
           <div flex>

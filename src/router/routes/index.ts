@@ -38,6 +38,12 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/search',
     name: 'search',
-    component: () => import('@/views/Search.vue')
+    component: () => import('@/views/Search.vue'),
+    children: [
+      {
+        path: 'result',
+        component: () => import('@/views/SearchResult.vue')
+      }
+    ]
   }
 ]

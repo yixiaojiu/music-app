@@ -1,4 +1,4 @@
-interface Artist {
+export interface Artist {
   id: number
   name: string
   picUrl?: any
@@ -35,7 +35,7 @@ interface Album {
   alia: string[]
 }
 
-interface Song {
+export interface Song {
   id: number
   name: string
   artists: Artist[]

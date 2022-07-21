@@ -21,7 +21,7 @@ const showNormalPlayer = () => {
 
 <template>
   <transition enter-active-class="animate__animated animate__fadeInUp" leave-active-class="animate__animated animate__fadeOutDown">
-    <div v-show="!useMusic.fullScreen" @click="showNormalPlayer" fixed flex items-center bottom-0 px-6 z-10 left-0 w-screen h-15 bg-gray-800 gap-4>
+    <div v-show="!useMusic.fullScreen" @click="showNormalPlayer" fixed z-30 flex items-center bottom-0 px-6 z-10 left-0 w-screen h-15 bg-gray-800 gap-4>
       <div h="4/5">
         <div ref="cdContainerRef" h-full rounded-full overflow-hidden>
           <img ref="cdImgRef" max-h-full :src="useMusic.currentSong.picUrl" alt="songPic" class="animate-spin" animate-duration-30000 />

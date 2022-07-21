@@ -194,7 +194,7 @@ const handleMoveEnd = () => {
 <template>
   <div v-show="useMusic.playList.length">
     <transition name="normal">
-      <div v-show="useMusic.fullScreen" fixed top-0 left-0 w-screen h-screen z-10 overflow-hidden bg-gray-800>
+      <div v-show="useMusic.fullScreen" fixed top-0 left-0 w-screen h-screen z-30 overflow-hidden bg-gray-800>
         <div absolute top-0 left-0 w-full h-full opacity-40 z--1 blur-20>
           <img h-full :src="useMusic.currentSong.picUrl" alt="songPic" />
         </div>

@@ -20,8 +20,7 @@ export default defineConfig({
         [/^h-screen-(\d+)$/, (match) => ({ height: `${match[1]}vh` })],
         ['custom-container', { width: '80vw', margin: '0 auto' }],
         ['dot-active', { width: '1rem', background: 'rgb(209, 213, 219)' }],
-        ['custom-transition-transform', { transition: 'transform 0.15s linear' }],
-        ['bg-000000', { color: '#000' }]
+        ['custom-transition-transform', { transition: 'transform 0.15s linear' }]
       ],
       shortcuts: [
         {
